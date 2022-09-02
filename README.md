@@ -14,3 +14,7 @@ NOTE: If you don't have maven installed on your computer, you can use maven wrap
 ## Accessing H2 Database Console
 
 Go to the http://localhost:8080/h2-console
+
+## Accessing OpenAPI3 Swagger Documentation
+
+Go to the http://localhost:8080/swagger
