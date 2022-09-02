@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.LockModeType;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -105,7 +106,7 @@ public class DroneServiceImpl implements DroneService {
             return medicationMapper.mapListOut(medications);
         }
         logger.warn("Drone not found for {}", droneSerialNumber);
-        return null;
+        return Collections.emptyList();
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
