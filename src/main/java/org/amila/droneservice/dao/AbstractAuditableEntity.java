@@ -12,7 +12,7 @@ public abstract class AbstractAuditableEntity implements Serializable {
 
     //TODO: Created and Update time to be added here (@CreatedDate and @LastModifiedDate)
 
-    public AbstractAuditableEntity() {
+    protected AbstractAuditableEntity() {
     }
 
     public Long getId() {

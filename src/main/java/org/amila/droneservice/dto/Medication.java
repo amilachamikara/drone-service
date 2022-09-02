@@ -9,6 +9,17 @@ public class Medication {
     private String code;
     private String imageURL;
 
+    public Medication() {
+    }
+
+
+    public Medication(String name, Double weight, String code, String imageURL) {
+        this.name = name;
+        this.weight = weight;
+        this.code = code;
+        this.imageURL = imageURL;
+    }
+
     public String getName() {
         return name;
     }

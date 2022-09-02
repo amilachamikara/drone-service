@@ -139,7 +139,7 @@ public class DroneServiceImpl implements DroneService {
 
     private void validateStatus(DroneDAO droneDAO) {
         if (droneDAO.getState() != State.LOADING) {
-            String message = String.format("Drone is not at %s state for loading!", State.IDLE);
+            String message = String.format("Drone is not at %s state for loading!", State.LOADING);
             logger.error("{}:{}", droneDAO.getState(), message);
             throw new ValidationException(message);
         }

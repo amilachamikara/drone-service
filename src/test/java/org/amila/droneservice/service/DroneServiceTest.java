@@ -2,6 +2,9 @@ package org.amila.droneservice.service;
 
 import org.amila.droneservice.common.Model;
 import org.amila.droneservice.common.State;
+import org.amila.droneservice.common.exception.LowBatteryException;
+import org.amila.droneservice.common.exception.ValidationException;
+import org.amila.droneservice.common.exception.WeightLimitException;
 import org.amila.droneservice.dao.DroneDAO;
 import org.amila.droneservice.dao.MedicationDAO;
 import org.amila.droneservice.dto.BatteryStatus;
@@ -24,8 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
@@ -41,7 +43,8 @@ class DroneServiceTest {
             new DroneDAO("SN123", Model.LIGHT_WEIGHT, 100.0, 40.0, State.LOADING, Arrays.asList(
                     new MedicationDAO("B705", "Naproxen", 50.0, "https://www.drugs.com/images/pills/fio/IPL01901/naproxen.JPG")
             )),
-            new DroneDAO("SN150", Model.MIDDLE_WEIGHT, 200.0, 70.0, State.LOADED, Collections.emptyList())
+            new DroneDAO("SN150", Model.MIDDLE_WEIGHT, 200.0, 70.0, State.LOADED, Collections.emptyList()),
+            new DroneDAO("SN170", Model.MIDDLE_WEIGHT, 200.0, 20.0, State.LOADING, Collections.emptyList())
     );
 
     @BeforeEach
@@ -55,8 +58,28 @@ class DroneServiceTest {
 
 
     @Test
-    void addMedications() {
+    void addMedicationsInvalidStateTest() {
+        when(droneRepository.findBySerialNumber(drones.get(1).getSerialNumber())).thenReturn(drones.stream().filter(droneDAO -> droneDAO.getSerialNumber().equals(drones.get(1).getSerialNumber())).findFirst());
 
+        assertThrows(ValidationException.class, () -> {
+            droneService.addMedications(drones.get(1).getSerialNumber(), Arrays.asList(new Medication("A", 100.0, "A", "A")));
+        });
+    }
+
+    @Test
+    void addMedicationsHighWeightTest() {
+        when(droneRepository.findBySerialNumber(drones.get(0).getSerialNumber())).thenReturn(drones.stream().filter(droneDAO -> droneDAO.getSerialNumber().equals(drones.get(0).getSerialNumber())).findFirst());
+
+        assertThrows(WeightLimitException.class, () -> {
+            droneService.addMedications(drones.get(0).getSerialNumber(), Arrays.asList(new Medication("A", 100.0, "A", "A")));
+        });
+    }
+
+    @Test
+    void addMedicationsLowBatteryLevelTest() {
+        when(droneRepository.findBySerialNumber(drones.get(2).getSerialNumber())).thenReturn(drones.stream().filter(droneDAO -> droneDAO.getSerialNumber().equals(drones.get(2).getSerialNumber())).findFirst());
+
+        assertThrows(LowBatteryException.class, () -> droneService.addMedications(drones.get(2).getSerialNumber(), Arrays.asList(new Medication("A", 100.0, "A", "A"))));
     }
 
     @Test
@@ -78,7 +101,7 @@ class DroneServiceTest {
 
         List<Drone> result = droneService.searchDrones(new DroneSearchCriteria(State.LOADING));
 
-        assertEquals(1, result.size());
+        assertEquals(2, result.size());
         assertEquals(drones.get(0).getSerialNumber(), result.get(0).getSerialNumber());
         assertEquals(drones.get(0).getState(), result.get(0).getState());
         assertEquals(drones.get(0).getMaxWeight(), result.get(0).getMaxWeight());
